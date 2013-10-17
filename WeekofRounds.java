@@ -34,22 +34,22 @@ public class WeekofRounds implements Serializable{
 			if ((rd.affirmative == null) && (rd.negative == null))
 				toreturn += "EMPTYTEAM vs. EMPTYTEAM - !!!!!! THIS IS ANOMALOUS." + newline;
 			else if ((rd.affirmative == null) && (rd.negative != null))
-				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative == null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative != null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 		}
 		toreturn += newline + "Tuesday:" + newline;
 		for (Round rd :tuesdayroundList){
 			if ((rd.affirmative == null) && (rd.negative == null))
 				toreturn += "EMPTYTEAM vs. EMPTYTEAM - !!!!!! THIS IS ANOMALOUS." + newline;
 			else if ((rd.affirmative == null) && (rd.negative != null))
-				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative == null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative != null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message+ newline;
 		}
 		
 		toreturn += newline + "Wednesday:" + newline;
@@ -57,11 +57,11 @@ public class WeekofRounds implements Serializable{
 			if ((rd.affirmative == null) && (rd.negative == null))
 				toreturn += "EMPTYTEAM vs. EMPTYTEAM - !!!!!! THIS IS ANOMALOUS." + newline;
 			else if ((rd.affirmative == null) && (rd.negative != null))
-				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative == null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative != null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 		}
 		
 		toreturn += newline + "Thursday:" + newline;
@@ -69,11 +69,11 @@ public class WeekofRounds implements Serializable{
 			if ((rd.affirmative == null) && (rd.negative == null))
 				toreturn += "EMPTYTEAM vs. EMPTYTEAM - !!!!!! THIS IS ANOMALOUS." + newline;
 			else if ((rd.affirmative == null) && (rd.negative != null))
-				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative == null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative != null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 		}
 		
 		toreturn += newline + "Friday:" + newline;
@@ -81,11 +81,11 @@ public class WeekofRounds implements Serializable{
 			if ((rd.affirmative == null) && (rd.negative == null))
 				toreturn += "EMPTYTEAM vs. EMPTYTEAM - !!!!!! THIS IS ANOMALOUS." + newline;
 			else if ((rd.affirmative == null) && (rd.negative != null))
-				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += "EMPTYTEAM vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative == null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. EMPTYTEAM" + rd.message + newline;
 			else if ((rd.affirmative != null) && (rd.negative != null))
-				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + newline;
+				toreturn += rd.affirmative.partner1 + "/" + rd.affirmative.partner2 + " vs. " + rd.negative.partner1 + "/" + rd.negative.partner2 + rd. message + newline;
 		}
 		
 		return toreturn;

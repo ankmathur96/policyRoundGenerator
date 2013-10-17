@@ -1,4 +1,3 @@
-import java.awt.Dialog.ModalExclusionType;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -20,18 +19,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Collections;
 
-import javax.security.auth.kerberos.KerberosKey;
-import javax.swing.JList.DropLocation;
-
 public class roundGenerator {
 	
-	final static int NUMBER_OF_WEEKS_TO_REMEMBER = 3;
+	final static int NUMBER_OF_WEEKS_TO_REMEMBER = 3; //number of weeks of history we will keep in account.
 	
 	/**Reads teamlist in from file and returns ArrayList of fully initialized Team structures.*/
 	private static ArrayList<Team> generateTeamList() throws IOException, FileNotFoundException{
@@ -207,6 +203,7 @@ public class roundGenerator {
 		
 		return returnmodule;
 	}
+	/**Given a list of rounds, searches the rounds for a team, returns the team's opponent and side in the Pair structure */
 	private static Pair<Team, String> findTeamAndReturnOpponent(Team teamtocheck, ArrayList<Round> dayList){
 		Team opponent = new Team();
 		String opponentside = "";
@@ -231,7 +228,6 @@ public class roundGenerator {
 		return returnmodule;
 	}
 	/**Rewrites round history by placing current week in first position, previous week in 2nd, week before that in 3rd. */
-
 	private static boolean writeRoundHistory(WeekofRounds thisweek) throws FileNotFoundException, IOException{
 		ArrayList<WeekofRounds> pastweeks = new ArrayList<WeekofRounds>();
 		boolean failure = false;
@@ -282,8 +278,42 @@ public class roundGenerator {
 		return true;
 	}
 	
+	/** Sorts teams by which days they are available into 5 daySets*/
+	private static ArrayList<ArrayList<Team>> sortTeamsbyDay(ArrayList<Team> teamList) {
+		ArrayList<Team> mondayList = new ArrayList<Team>();
+		ArrayList<Team> tuesdayList = new ArrayList<Team>();
+		ArrayList<Team> wednesdayList = new ArrayList<Team>();
+		ArrayList<Team> thursdayList = new ArrayList<Team>();
+		ArrayList<Team> fridayList = new ArrayList<Team>();
+		
+		for (Team tm :teamList){
+			Set<String> daysAvailable = tm.daysAvailable;
+			for (String day :daysAvailable){
+				if (day.equals("M"))
+					mondayList.add(tm);
+				if (day.equals("Tu"))
+					tuesdayList.add(tm);
+				if (day.equals("W"))
+					wednesdayList.add(tm);
+				if (day.equals("Th"))
+					thursdayList.add(tm);
+				if (day.equals("F"))
+					fridayList.add(tm);
+			}
+		}
+		
+		ArrayList<ArrayList<Team>> returnmodule = new ArrayList<ArrayList<Team>>();
+		returnmodule.add(mondayList);
+		returnmodule.add(tuesdayList);
+		returnmodule.add(wednesdayList);
+		returnmodule.add(thursdayList);
+		returnmodule.add(fridayList);
+		
+		return returnmodule;
+	}
+	
 	/**Creates rounds for a week given a teamlist and returns a WeekofRounds object*/
-	private static WeekofRounds createFirstPairing(ArrayList<Team> teamList, String roundweek){
+	private static WeekofRounds createPairing(ArrayList<Team> teamList, String roundweek){
 
 		ArrayList<Round> mondayroundList = new ArrayList<Round>();
 		ArrayList<Round> tuesdayroundList = new ArrayList<Round>();
@@ -309,46 +339,12 @@ public class roundGenerator {
 			thursdayroundList = pairTeamsByDay(thursdayList, teamList);
 		if (!fridayList.isEmpty())
 			fridayroundList = pairTeamsByDay(fridayList, teamList);
-		/*for (Team currentTeam :teamList){
-			currentTeam.hasgoneaff = false;
-			currentTeam.hasgoneneg = false;
-			
-			Pair<Team, ArrayList<Round>> returnedmodule = new Pair<Team, ArrayList<Round>>();
-			if (mondayList.contains(currentTeam)){
-				returnedmodule = placeTeamInDay(currentTeam, mondayroundList);
-				mondayroundList = returnedmodule.getSecond();
-				currentTeam = returnedmodule.getFirst();
-			}
-			
-			if (tuesdayList.contains(currentTeam)){
-				returnedmodule = placeTeamInDay(currentTeam, tuesdayroundList);
-				tuesdayroundList = returnedmodule.getSecond();
-				currentTeam = returnedmodule.getFirst();
-			}
-			
-			if (wednesdayList.contains(currentTeam)){
-				returnedmodule = placeTeamInDay(currentTeam, wednesdayroundList);
-				wednesdayroundList = returnedmodule.getSecond();
-				currentTeam = returnedmodule.getFirst();
-			}
-			
-			if (thursdayList.contains(currentTeam)){
-				returnedmodule = placeTeamInDay(currentTeam, thursdayroundList);
-				thursdayroundList = returnedmodule.getSecond();
-				currentTeam = returnedmodule.getFirst();
-			}
-			
-			if (fridayList.contains(currentTeam)){
-				returnedmodule = placeTeamInDay(currentTeam, fridayroundList);
-				fridayroundList = returnedmodule.getSecond();
-				currentTeam = returnedmodule.getFirst();
-			}	
-		}*/
 		//initialize a week based on the current lists for rounds.
 		WeekofRounds currentWeek = new WeekofRounds(mondayroundList, tuesdayroundList, wednesdayroundList, thursdayroundList, fridayroundList, roundweek, teamList);
 		return currentWeek;
 	}
-	@SuppressWarnings("unchecked")
+	
+	/**MAIN FUNCTION: Takes in a list of teams, along with the global team list, and returns a round pairing. */
 	private static ArrayList<Round> pairTeamsByDay (ArrayList<Team> dayList, ArrayList<Team> teamList){
 		ArrayList<Round> dayPairing = new ArrayList<Round>();
 		
@@ -356,7 +352,8 @@ public class roundGenerator {
 		ArrayList<Team> needaff = new ArrayList<Team>();
 		ArrayList<Team> needneg = new ArrayList<Team>();
 		ArrayList<Team> nopref = new ArrayList<Team>();
-		//sort teams into these 4 categories, which we will use to perform ranked placement.
+		
+		//sort teams into these 3 categories, which we will use to perform ranked placement.
 		for (Team tm :dayList){
 			int globalListLocation = locateTeaminList(tm, teamList);
 			Team globalteam = teamList.get(globalListLocation);
@@ -390,7 +387,7 @@ public class roundGenerator {
 		if (!nopref.isEmpty())
 			pairOneList(nopref, teamList, dayPairing);
 		
-		//now, we should just have the leftovers. throw everyone into 1 pile now and try it.
+		//now, we should just have the leftovers. throw everyone into 1 pile now and pair again.
 		ArrayList<Team> remainderList = new ArrayList<Team>();
 		remainderList.addAll(needaff);
 		remainderList.addAll(needneg);
@@ -407,89 +404,95 @@ public class roundGenerator {
 		return dayPairing;
 	}
 	
+	/**This function takes in 1 list, the global list, and the current pairing structure. It changes these by reference.*/
 	private static void pairOneList (ArrayList<Team> list, ArrayList<Team> teamList, ArrayList<Round> dayPairing){//problem is with the deletion function, which is failing to delete anything from the lists.
-		int parity = list.size() % 2;
 		int listindex = 0;
 		ArrayList<Integer> dropList = new ArrayList<Integer>();
+		
 		while (listindex < list.size()){
 
-				if (dropList.contains(listindex)){
-					listindex = listindex +1;
-					continue;
-				}				
-				Team tm1 = list.get(listindex);
-				Team tm2 = new Team();
-				int k = listindex + 1;
-				if (k < list.size())
-					tm2 = list.get(k);
-				else {
-					listindex = listindex + 1;
-					continue;
-				}
+			//first, check if the dropList already contains the index we would consider. If that is the case, this team has already been paired and should not be considered.
+			if (dropList.contains(listindex)){
+				listindex = listindex +1;
+				continue;
+			}				
+			Team tm1 = list.get(listindex);
+			Team tm2 = new Team();
+			//this additional complication is needed in the case that we hit the end of the list and k > size of the list. That triggers NPE.
+			int k = listindex + 1;
+			if (k < list.size())
+				tm2 = list.get(k);
+			else {
+				listindex = listindex + 1; //this would just ensure that we break from the while loop.
+				continue;
+			}
 				
-				boolean skiphistorycheck = false;
-				boolean breaktonext = false;
-				boolean conflict = historyCheck(tm1, tm2);
-				if (conflict)
-					conflict = historyCheck(tm2, tm1); //check if a switch solves the problem.
-				else
-					skiphistorycheck = true;
-				//checked the switch.
-				if (!skiphistorycheck && conflict)
-					while (conflict){
-						k = k+1;
-						if (k < list.size()){
-							tm2 = list.get(k);
-							conflict = historyCheck(tm1, tm2);
-						}
-						else{
-							breaktonext = true;
-							break;
-						}
+			boolean skiphistorycheck = false;
+			boolean breaktonext = false;
+			boolean conflict = historyCheck(tm1, tm2);
+			if (conflict)
+				conflict = historyCheck(tm2, tm1); //check if switching the teams removes the conflict.
+			else //no conflict. therefore, skip rest of the logic.
+				skiphistorycheck = true;
+			
+			if (!skiphistorycheck && conflict) //if switching doesn't work (conflict = true), then iterate k over the list and historycheck each scenario.
+				while (conflict){
+					k = k+1;
+					if (k < list.size()){
+						tm2 = list.get(k);
+						conflict = historyCheck(tm1, tm2);
 					}
-				else if (!skiphistorycheck && !conflict){
-					Team tmp = new Team();
-					tmp = tm1;
-					tm1 = tm2;
-					tm2 = tmp;				
+					else{ //this would mean there is no one the team can go aff against. we should break from this team and move on.
+						breaktonext = true;
+						break;
+					}
 				}
-				if (breaktonext){
-					listindex = listindex + 1;
-					continue;
-				}
-				
-				//we have finally gotten a tm1 and a tm2 that can be paired.
-				Round newRound = new Round(tm1, tm2);
-				String potentialconflict = "";
-				int t1location = locateTeaminList(tm1, teamList);
-				if (tm1.hasgoneaff)
-					potentialconflict = "T1 Has Already Gone Aff.";
-				tm1.hasgoneaff = true;
-				tm1.historyNegSet.add(tm2);
-				tm1.availablescore = tm1.availablescore+1; //incrementing the score reduces likelihood of being picked later.
-				teamList.set(t1location, tm1); //change the team's status in the global teamlist.
-				dropList.add(listindex);
-				
-				int t2location = locateTeaminList(tm2, teamList);
-				if (tm2.hasgoneneg)
-					potentialconflict += "T2 Has Already Gone Neg";
-				tm2.hasgoneneg = true;
-				tm2.historyAffSet.add(tm1);
-				tm2.availablescore = tm2.availablescore+1;
-				teamList.set(t2location, tm2);
-				dropList.add(k);
-				
-				newRound.message = potentialconflict;
-				dayPairing.add(newRound);
+			else if (!skiphistorycheck && !conflict){ //the switch was effective. therefore, switch the teams.
+				Team tmp = new Team();
+				tmp = tm1;
+				tm1 = tm2;
+				tm2 = tmp;				
+			}
+			if (breaktonext){ //in case, this team cannot be paired.
 				listindex = listindex + 1;
+				continue;
+			}
+				
+			//we have finally gotten a tm1 and a tm2 that can be paired without a conflict of history.
+			Round newRound = new Round(tm1, tm2);
+			String potentialconflict = "";
+			int t1location = locateTeaminList(tm1, teamList); // this is so we can edit the global list with the histories and the aff/neg status.
+			if (tm1.hasgoneaff) //if someone ends up going aff twice, this message is the conflict.
+				potentialconflict = "T1 Has Already Gone Aff.";
+			tm1.hasgoneaff = true;
+			tm1.historyNegSet.add(tm2);
+			tm1.availablescore = tm1.availablescore+1; //incrementing the score reduces likelihood of being picked later.
+			teamList.set(t1location, tm1); //change the team's status in the global teamlist.
+			dropList.add(listindex);
+				
+			int t2location = locateTeaminList(tm2, teamList);
+			if (tm2.hasgoneneg)
+				potentialconflict += "T2 Has Already Gone Neg";
+			tm2.hasgoneneg = true;
+			tm2.historyAffSet.add(tm1);
+			tm2.availablescore = tm2.availablescore+1;
+			teamList.set(t2location, tm2);
+			dropList.add(k);
+				
+			newRound.message = potentialconflict;
+			dayPairing.add(newRound);
+			listindex = listindex + 1;
 		}
+		//now, we need to remove the teams we paired from the list we paired.
+		//sort dropList from greatest to least so that you can delete without iterative problems.
 		Collections.sort(dropList, Collections.reverseOrder());
 		
 		for (int dropindex :dropList)
 			list.remove(dropindex);
-		
+		//no need to return. we passed the structure in by reference, and it has been edited as such.
 	}
-	@SuppressWarnings("unchecked")
+	
+	/**Pairs two exclusive lists by adding rounds to a Roundlist. */
 	private static void pairTwoLists (ArrayList<Team> affList, ArrayList<Team> negList, ArrayList<Team> teamList, ArrayList<Round> dayPairing){
 		if (!affList.isEmpty() && !negList.isEmpty()){
 			ArrayList<Integer> dropList1 = new ArrayList<Integer>();
@@ -550,6 +553,7 @@ public class roundGenerator {
 		}
 	}
 
+	/**Takes in 2 teams and checks if the aff has gone aff against that neg team before. */ 
 	private static boolean historyCheck (Team aff, Team neg){
 		if (aff.historyNegSet == null)
 			return false;
@@ -559,7 +563,8 @@ public class roundGenerator {
 			return false;
 		}
 	}
-/**Checks for team equivalence by PARTNER NAME. Checks for reverse name as well.
+	
+/**Locates a team in a list of teams. Returns location index.
  * 
  * @param tm
  * @param list
@@ -575,6 +580,7 @@ public class roundGenerator {
 			String name2 = eachteam.partner2;
 			if ((name1.equals(targetpartner1)) && (name2.equals(targetpartner2)))
 				location = targetindex;
+			//check for reverse as well.
 			if ((name2.equals(targetpartner1)) && (name1.equals(targetpartner2)))
 				location = targetindex;
 		}
@@ -584,7 +590,8 @@ public class roundGenerator {
 		
 		return location;
 	}
-	/** Returns changed RoundList with changed team (altered hasgoneaff or hasgone neg)*/
+	
+	/** DEPRECATED: Holistic pairing approach. Iterates over the team instead of the day. */
 	private static Pair<Team, ArrayList<Round>> placeTeamInDay (Team currentTeam, ArrayList<Round> dayRoundList){
 		boolean done = false;
 		if (dayRoundList.isEmpty() && !done){
@@ -676,39 +683,7 @@ public class roundGenerator {
 		return returnitem;
 	}
 	
-	/** Sorts teams by which days they are available into 5 daySets*/
-	private static ArrayList<ArrayList<Team>> sortTeamsbyDay(ArrayList<Team> teamList) {
-		ArrayList<Team> mondayList = new ArrayList<Team>();
-		ArrayList<Team> tuesdayList = new ArrayList<Team>();
-		ArrayList<Team> wednesdayList = new ArrayList<Team>();
-		ArrayList<Team> thursdayList = new ArrayList<Team>();
-		ArrayList<Team> fridayList = new ArrayList<Team>();
-		
-		for (Team tm :teamList){
-			Set<String> daysAvailable = tm.daysAvailable;
-			for (String day :daysAvailable){
-				if (day.equals("M"))
-					mondayList.add(tm);
-				if (day.equals("Tu"))
-					tuesdayList.add(tm);
-				if (day.equals("W"))
-					wednesdayList.add(tm);
-				if (day.equals("Th"))
-					thursdayList.add(tm);
-				if (day.equals("F"))
-					fridayList.add(tm);
-			}
-		}
-		
-		ArrayList<ArrayList<Team>> returnmodule = new ArrayList<ArrayList<Team>>();
-		returnmodule.add(mondayList);
-		returnmodule.add(tuesdayList);
-		returnmodule.add(wednesdayList);
-		returnmodule.add(thursdayList);
-		returnmodule.add(fridayList);
-		
-		return returnmodule;
-	}
+	/**UNUSED: Conflict resolution function. Probably should just be rewritten. Currently makes no sense. */
 	private static ArrayList<Round> removeConflicts(ArrayList<Round> dayList){
 		ArrayList<Round> optimizedlist = new ArrayList<Round>();
 		LinkedHashSet<Integer> dropSet = new LinkedHashSet<Integer>();
@@ -728,7 +703,7 @@ public class roundGenerator {
 				continue;
 			}
 			
-			int replacedindex;
+			int replacedindex = 0;
 			boolean wasconflict = false;
 			for (int j = i+1; j < dayList.size(); j++){
 			while (!wasconflict){
@@ -780,10 +755,11 @@ public class roundGenerator {
 				optimizedlist.add(dayList.get(f));
 			}
 		}
-		//mixup between optimized list and dayList
+		
 		return optimizedlist;
 	}
-	/** Optimizes a week of rounds to have the least possible empty rounds */
+	
+	/** DEPRECATED/UNUSED: Optimizes a week of rounds to have the least possible empty rounds */
 	private static WeekofRounds optimizeRounds (WeekofRounds thisweek, ArrayList<Team> teamList){
 		ArrayList<Round> mondayList = thisweek.mondayroundList;
 		ArrayList<Round> tuesdayList = thisweek.tuesdayroundList;
@@ -814,25 +790,22 @@ public class roundGenerator {
 		//absolute worst case scenario - resolve round issues by moving teams and adding a conflict note.
 		return optimizedWeek;
 	}
-	/**
-	 * @param args
-	 * @throws IOException 
-	 */
 	
 	/**Runs generation code.*/
 	public static void main(String[] args) throws IOException {
-		
-		String roundweek = "Week of 9/23/13";
+		System.out.println("Policy Debate Round Generator (v. 2.0) by Ankit Mathur");
+		System.out.println("Please enter the week of rounds you wish to generate.");
+		Scanner input = new Scanner(System.in);
+		String roundweek = input.nextLine();
+		//if (roundweek.equals("admin"))
+			//adminpanel();
 		ArrayList<Team> teamList = generateTeamList();
-		System.out.println("Past generation.");
-		WeekofRounds thisweek = createFirstPairing(teamList, roundweek);
-		System.out.println("Past creation.");
-		//WeekofRounds optimizedweek = optimizeRounds(thisweek, teamList);
-		WeekofRounds optimizedweek = thisweek;
-		boolean writesuccess = writeRoundHistory(optimizedweek);
+		WeekofRounds thisweek = createPairing(teamList, roundweek);
+		boolean writesuccess = writeRoundHistory(thisweek);
 		if (!writesuccess)
 			System.out.println("ALERT - ROUND HISTORY FAILED TO WRITE.");
 		
+		input.close();
 		System.out.println(thisweek.toString());
 		
 	}
