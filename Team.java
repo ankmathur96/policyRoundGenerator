@@ -16,7 +16,7 @@ public class Team implements Serializable{
 	public HashSet<Team> historyNegSet; //defines who the team has BEEN AFF AGAINST. Teams that have been neg against this team.
 	public Set<String> daysAvailable;
 	public int availablescore;
-	
+	public String notes;
 	public boolean three_days_exception;
 	public boolean three_day_toggle;
 	public Team (String member1, String member2, Set<String> daySet){
